@@ -1,4 +1,4 @@
-# calculadora
+# calculadora-juros-vue
 
 ## Project setup
 ```

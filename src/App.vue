@@ -6,7 +6,6 @@
 
 <script>
 import Inicio from './components/Inicio.vue'
-
 export default {
   name: 'app',
   components: {
