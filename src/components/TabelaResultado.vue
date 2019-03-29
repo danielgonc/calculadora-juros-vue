@@ -17,11 +17,11 @@
                 </th>
             </thead>
             <tbody>
-                <tr>
-                    <td>{{multaAtraso}}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                <tr v-show="totalPagar != ''">
+                    <td >R${{multaAtraso}}</td>
+                    <td >{{diasAtrasados}}</td>
+                    <td >R${{jurosCalculado}}</td>
+                    <td>R${{totalPagar}}</td>
                 </tr>
             </tbody>
         </table>
@@ -30,11 +30,20 @@
 <script>
 export default {
     name: "app",
-    props:{
-        titulo:String,
-        multaAtraso:Float32Array,
-        diferencaDias: 
-    }
+    props:[
+        'titulo',
+        'multaAtraso',
+        'diasAtrasados',
+        'jurosCalculado',
+        'totalPagar'
+    ]
 }
+
 </script>
+<style>
+table{
+    width: 100%;
+}
+</style>
+
 

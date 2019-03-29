@@ -5,22 +5,22 @@
                 <h2>{{nomeForm}}</h2>
                 <form v-on:submit="submitForm">
                     <label for="jurosMesEle" class="label-padrao">Juros por mes</label>
-                    <input id="jurosMesEle" v-model="jurosMes" type="number" class="input-padrao">
+                    <input id="jurosMesEle" v-model="jurosMes" type="number" class="input-padrao" required>
 
                     <label for="multaAtrasoEle" class="label-padrao">Multa por atraso</label>
-                    <input id="multaAtrasoEle" v-model="multaAtraso" type="number" class="input-padrao">
+                    <input id="multaAtrasoEle" v-model="multaAtraso" type="number" class="input-padrao" required>
 
                     <label for="valorMenEle" class="label-padrao">Valor da mensalidade</label>
-                    <input id="valorMenEle" v-model="valorMen" type="number" class="input-padrao">
+                    <input id="valorMenEle" v-model="valorMen" type="number" class="input-padrao" required>
 
                     <label for="dataVencimentoEle" class="label-padrao">Data de vencimento</label>
                     <div class="campos-data">
-                        <input id="dataVencimentoEle" v-model.lazy="dataVencimento" type="date" class="input-padrao">
+                        <input id="dataVencimentoEle" v-model.lazy="dataVencimento" type="date" class="input-padrao" required>
                         <span class="span-data" v-on:click="dataVencimento = obterDataAtual()">Hoje</span>
                     </div>
                     <label for="dataHojeEle" class="label-padrao">Data de hoje</label>
                     <div class="campos-data">
-                        <input id="dataHojeEle" v-model="dataHoje" type="date" class="input-padrao">
+                        <input id="dataHojeEle" v-model="dataHoje" type="date" class="input-padrao" required>
                         <span class="span-data" v-on:click="dataHoje = obterDataAtual()">Hoje</span>
                     </div>
                     
@@ -31,7 +31,11 @@
         </div>
         <div class="direita">
             <div class="wrapper">
-                <TabelaResultado v-bind:titulo="nomeTabela"></TabelaResultado>
+                <TabelaResultado v-bind:titulo="nomeTabela" 
+                                :multaAtraso="multaAtrasoCalculado" 
+                                :diasAtrasados="diasAtrasados"
+                                :jurosCalculado="jurosCalculado"
+                                :totalPagar="totalPagar"></TabelaResultado>
             </div>
         </div>
     </div>
@@ -48,7 +52,11 @@ export default {
             valorMen: '',
             dataHoje: '',
             dataVencimento: '',
-            nomeTabela: 'Resultado'
+            nomeTabela: 'Resultado',
+            multaAtrasoCalculado: '',
+            diasAtrasados: '',
+            jurosCalculado: '',
+            totalPagar: ''
         }
     },
     components:{
@@ -57,13 +65,38 @@ export default {
     methods: {
         submitForm: function (e){
             e.preventDefault();
-            alert(this.jurosMes);
+            this.diasAtrasados = this.calcularDiferencaDeDias();
+            this.valorMen = parseFloat(this.valorMen);
+            if(this.diasAtrasados > 0){
+
+                this.multaAtrasoCalculado = parseFloat(((this.multaAtraso/100)*this.valorMen).toPrecision(1));
+
+                let juroPorDia = parseFloat((parseFloat(this.jurosMes/30)/100).toPrecision(1));
+                this.jurosCalculado = parseFloat(this.diasAtrasados * (juroPorDia * this.valorMen));
+                this.totalPagar = this.jurosCalculado + this.multaAtrasoCalculado + this.valorMen;
+            }else{
+                this.multaAtrasoCalculado = 0;
+                this.jurosCalculado = 0;
+                this.totalPagar = this.valorMen;
+            }
 
         },
         obterDataAtual: function(){
             let data = new Date(Date.now());
             data = `${data.getFullYear()}-${("0" + (data.getMonth() + 1)).slice(-2)}-${("0" + data.getDate()).slice(-2)}`;
             return data;
+        },
+        calcularDiferencaDeDias: function(){
+            let dataHoje = new Date(this.dataHoje);
+            let dataVencimento = new Date(this.dataVencimento);
+
+            if(dataVencimento < dataHoje)
+                return 0;
+            else{
+                let diffHr = Math.abs(dataHoje.getTime() - dataVencimento.getTime());
+                let diferencaDias = Math.ceil(diffHr / (1000 * 3600 * 24)); 
+                return diferencaDias;
+            }
         }
     }
 }
